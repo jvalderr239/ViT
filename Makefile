@@ -1,9 +1,10 @@
 # define the name of the virtual environment directory
 VENV := venv
 BIN := ${VENV}/bin
-PYTHON := ${BIN}/python3
+PYTHON := ${BIN}/python3.8
 PIP := ${BIN}/pip
 DIST := ${VENV}/dist
+PROJECT = ${VENV}/../
 
 .DEFAULT_GOAL := help
 
@@ -25,7 +26,7 @@ coverage_src = src
 all: venv
 
 $(VENV)/bin/activate: requirements.txt
-	python3 -m venv $(VENV)
+	python3.8 -m venv $(VENV)
 	${PIP} install --upgrade pip black isort mypy pytest coverage pylint
 	${PIP} install -r requirements.txt
 
@@ -35,7 +36,7 @@ help:
 # venv is a shortcut target
 venv: $(VENV)/bin/activate
 
-check: venv check-format check-types lint clean
+check: venv check-format check-types lint
 
 check-format:
 	${BIN}/black --check ${python_src}
@@ -44,9 +45,9 @@ check-format:
 check-types:
 	${BIN}/mypy ${python_src}
 
-build: clean venv
+build: venv
 	${PIP} install wheel
-	${PYTHON} -m setup bdist_wheel --target ${VENV}
+	${PYTHON} -m setup bdist_wheel
 
 test: build
 	${PIP} install ${DIST}/*
@@ -59,6 +60,9 @@ coverage: test
 format: venv
 	${BIN}/black ${python_src}
 	${BIN}/isort ${python_src}
+
+dev: venv
+	${PIP} install -e ${PROJECT}.[dev]
 
 lint:
 	${BIN}/pylint ${python_src} -f parseable -r n
@@ -86,4 +90,4 @@ clean-test:
 	rm -f coverage
 	rm -rf htmlcov/
 
-.PHONY: all clean check build test help
+.PHONY: all clean check dev build test help

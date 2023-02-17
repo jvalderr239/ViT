@@ -1,21 +1,26 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build"
+requires = ["setuptools" ,"wheel"]
 
 [project]
 name = "ViT"
-version = "0.0.1"
 authors = [
-  { name="Jose Valderrama", email="jvalderr239@gmail.com" },
+  { name="Jose Valderrama", email="jvalderr239@gmail.com" }
 ]
 description = "Visual Transformer for image classification"
-readme = "README.md"
-requires-python = "==3.9"
+requires-python = "==3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dynamic = ["version", "readme"]
+
+[project.optional-dependencies]
+dev = [
+  "matplotlib", 
+  "pandas", 
+  "ipykernel"
+  ]
 
 [project.urls]
 "Homepage" = "https://github.com/jvalderr239/ViT"

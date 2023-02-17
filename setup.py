@@ -28,8 +28,5 @@ setup(
         "matplotlib",
         "rich",
     ],
-    python_requires=">=3.8",
-    extras_require={
-        "dev": ["pylint", "pytest", "pandas"]
-    },
+    python_requires=">=3.8"
 )
