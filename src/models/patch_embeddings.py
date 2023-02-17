@@ -1,5 +1,37 @@
+from functools import partial
+
+import torch.nn.functional as F
 from torch import Tensor, nn
 
+
+class LambdaPatchLayer(nn.Module):
+    def __init__(self, kernel: int = 16):
+        """
+        Custom layer to generate image patches
+
+        Keyword Arguments:
+            kernel -- image patch size (default: {16})
+        """
+        super(LambdaPatchLayer, self).__init__()
+        self.kernel = kernel
+
+    def forward(self, x: Tensor) -> Tensor:
+        return self.patch(x)
+
+    def patch(self, img: Tensor)->Tensor:
+        """
+        Slices the images into square patches
+        Arguments:
+            img -- input image shape (b, c, h, w)
+            kernel -- size of patches
+
+        Returns:
+            Tensor of flattened square image patches
+        """
+        assert len(img.shape) == 4, "Invalid input image batch size"
+        b, c, *_ = img.shape
+        patches = img.unfold(2, self.kernel, self.kernel).unfold(3, self.kernel, self.kernel)
+        return patches.reshape(b, -1, c * self.kernel * self.kernel)
 
 class PatchEmbedding(nn.Module):
     """
@@ -18,21 +50,28 @@ class PatchEmbedding(nn.Module):
         """
         Generate linear projection layer to map image patches to token embedding layer
 
-        Args:
-            channels: Number of channels for image
-            patch_size: Dimension of square image patch
-            emb_size: size of token embeddings
+        Arguments:
+            channels -- Number of channels for image
+            patch_size -- Dimension of square image patch
+            emb_size -- size of token embeddings
         """
-        self.patch_size = patch_size
         super().__init__()
         self.projection = nn.Sequential(
             ## authors use conv layer for performance gain that uses kernel size of patch
             ## apply convolution to each patch and then flatten
-            nn.Conv2d(channels, emb_size, kernel_size=patch_size, stride=patch_size),
+            ## nn.Conv2d(channels, emb_size, kernel_size=patch_size, stride=patch_size),
+            LambdaPatchLayer(kernel=patch_size),
+            nn.Linear(patch_size * patch_size * channels, emb_size)
         )
 
     def forward(self, img: Tensor) -> Tensor:
         """
-        Forward pass
+        Forward pass for input image through this model
+
+        Arguments:
+            img -- Input image for model
+
+        Returns:
+            1D linear projection of image patches
         """
         return self.projection(img)

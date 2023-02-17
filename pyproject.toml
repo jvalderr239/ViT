@@ -19,7 +19,8 @@ dynamic = ["version", "readme"]
 dev = [
   "matplotlib", 
   "pandas", 
-  "ipykernel"
+  "ipykernel",
+  "Pillow"
   ]
 
 [project.urls]
