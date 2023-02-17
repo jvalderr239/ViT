@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build"
+
+[project]
+name = "ViT"
+version = "0.0.1"
+authors = [
+  { name="Jose Valderrama", email="jvalderr239@gmail.com" },
+]
+description = "Visual Transformer for image classification"
+readme = "README.md"
+requires-python = "==3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/jvalderr239/ViT"
+"Bug Tracker" = "https://github.com/jvalderr239/ViT/issues"
