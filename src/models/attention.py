@@ -67,7 +67,7 @@ class ResidualAdd(nn.Module):
 
 
 class FeedForwardBlock(nn.Sequential):
-    def __init__(self, emb_size: int, expansion: int = 4, drop_p: float = 0.0):
+    def __init__(self, embed_size: int, expansion: int = 4, drop_p: float = 0.0):
         """
         MLP block for ViT
 
@@ -79,10 +79,10 @@ class FeedForwardBlock(nn.Sequential):
             drop_p -- dropout rate (default: {0.})
         """
         super().__init__(
-            nn.Linear(emb_size, expansion * emb_size),
+            nn.Linear(embed_size, expansion * embed_size),
             nn.GELU(),
             nn.Dropout(drop_p),
-            nn.Linear(expansion * emb_size, emb_size),
+            nn.Linear(expansion * embed_size, embed_size),
         )
 
 
@@ -95,6 +95,15 @@ class TransformerEncoderBlock(nn.Sequential):
         forward_drop_p: float = 0.0,
         **kwargs,
     ):
+        """
+        Transformer Encoder Block
+
+        Keyword Arguments:
+            emb_size -- Embedding size (default: {768})
+            drop_p -- Dropout Rate (default: {0.0})
+            forward_expansion -- Dilation factor for ForwardFeedBlock (default: {4})
+            forward_drop_p -- Dropout Rate for ForwardFeedBlock (default: {0.0})
+        """
         super().__init__(
             ResidualAdd(
                 nn.Sequential(

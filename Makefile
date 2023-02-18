@@ -4,7 +4,8 @@ BIN := ${VENV}/bin
 PYTHON := ${BIN}/python3.8
 PIP := ${BIN}/pip
 DIST := ${VENV}/dist
-PROJECT = ${VENV}/../
+LIBS := ${VENV}/lib/python3.8/site-packages
+PROJECT := ${VENV}/../
 
 .DEFAULT_GOAL := help
 
@@ -47,7 +48,7 @@ check-types:
 	${BIN}/mypy ${python_src}
 
 build: venv
-	${PIP} install wheel
+	${PIP} install wheel --target ${LIBS}
 	${PYTHON} -m setup bdist_wheel
 
 test: build
@@ -63,7 +64,7 @@ format: venv
 	${BIN}/isort ${python_src}
 
 dev: venv
-	${PIP} install -e ${PROJECT}.[dev] --target target
+	${PIP} install -e ${PROJECT}.[dev] --target ${LIBS}
 
 lint:
 	${BIN}/pylint ${python_src} -f parseable -r n
@@ -74,6 +75,7 @@ clean-build:
 	rm -rf ${VENV}/
 	rm -rf ${DIST}/
 	rm -rf build/
+	rm -rf target/
 	rm -rf .eggs/
 	find . -name '*.egg-info' -exec rm -rf {} +
 	find . -name '*.egg' -exec rm -rf {} +

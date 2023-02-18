@@ -9,6 +9,7 @@ class LambdaMeanLayer(nn.Module):
         Keyword Arguments:
             kernel -- image patch size (default: {16})
         """
+        super().__init__()
 
     def forward(self, x: Tensor) -> Tensor:
         return mean(x, 1, True)

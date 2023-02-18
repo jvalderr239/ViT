@@ -6,9 +6,14 @@ from src.models.patch_embeddings import PatchEmbedding
 
 
 class ViT(nn.Sequential):
+    """
+    Visual Transformer 
+
+    source: https://jalammar.github.io/illustrated-transformer/
+    """
     def __init__(
         self,
-        in_channels: int = 3,
+        channels: int = 3,
         patch_size: int = 16,
         emb_size: int = 768,
         img_size: int = 224,
@@ -17,7 +22,7 @@ class ViT(nn.Sequential):
         **kwargs,
     ):
         super().__init__(
-            PatchEmbedding(in_channels, patch_size, emb_size, img_size),
+            PatchEmbedding(channels, patch_size, emb_size, img_size),
             TransformerEncoder(depth, emb_size=emb_size, **kwargs),
             ClassificationHead(emb_size, n_classes),
         )
