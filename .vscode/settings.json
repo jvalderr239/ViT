@@ -66,8 +66,4 @@
     "autoDocstring.quoteStyle": "\"\"\"",
     "autoDocstring.generateDocstringOnEnter": true,
     "typescript.preferences.importModuleSpecifier": "relative",
-    //"terminal.integrated.env.windows": {
-    //    "PYTHONPATH": "${workspaceFolder}/src;${workspaceFolder}/src/models;${workspaceFolder}/src/datasets;${workspaceFolder}/src/utils;${workspaceFolder}/tests"
-    //},
-    //"python.envFile": "${workspaceFolder}/.env",
 }
