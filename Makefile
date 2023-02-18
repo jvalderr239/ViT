@@ -75,7 +75,6 @@ clean-build:
 	rm -rf ${VENV}/
 	rm -rf ${DIST}/
 	rm -rf build/
-	rm -rf target/
 	rm -rf .eggs/
 	find . -name '*.egg-info' -exec rm -rf {} +
 	find . -name '*.egg' -exec rm -rf {} +
