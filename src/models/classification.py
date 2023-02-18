@@ -4,10 +4,7 @@ from torch import Tensor, mean, nn
 class LambdaMeanLayer(nn.Module):
     def __init__(self):
         """
-        Custom layer to generate image patches
-
-        Keyword Arguments:
-            kernel -- image patch size (default: {16})
+        Custom layer to calculate mean
         """
         super().__init__()
 

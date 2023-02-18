@@ -1,3 +1,5 @@
+from typing import Optional
+
 from torch import Tensor, einsum, finfo, float32, nn
 
 
@@ -18,7 +20,7 @@ class MultiHeadAttention(nn.Module):
         self.att_drop = nn.Dropout(dropout)
         self.projection = nn.Linear(embed_size, embed_size)
 
-    def forward(self, x: Tensor, mask: Tensor = None) -> Tensor:
+    def forward(self, x: Tensor, mask: Optional[Tensor] = None) -> Tensor:
         # split keys, queries and values in num_heads
         b, n, hd = x.shape
         queries = self.queries(x).reshape(b, self.num_heads, n, hd // self.num_heads)
@@ -31,7 +33,7 @@ class MultiHeadAttention(nn.Module):
         )  # batch, num_heads, query_len, key_len
         if mask is not None:
             fill_value = finfo(float32).min
-            energy.mask_fill(~mask, fill_value)
+            energy.masked_fill(~mask, fill_value)
 
         ## sqrt(d_k)
         scaling = self.emb_size ** (1 / 2)

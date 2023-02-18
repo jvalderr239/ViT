@@ -7,10 +7,11 @@ from src.models.patch_embeddings import PatchEmbedding
 
 class ViT(nn.Sequential):
     """
-    Visual Transformer 
+    Visual Transformer
 
     source: https://jalammar.github.io/illustrated-transformer/
     """
+
     def __init__(
         self,
         channels: int = 3,

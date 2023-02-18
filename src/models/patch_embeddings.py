@@ -102,7 +102,9 @@ class PatchEmbedding(nn.Module):
         Returns:
             1D linear projection of image patches along with positional and class embeddings
         """
-        assert len(img.shape) == 4, f"Expected 4D (batched) image input but got {len(img.shape)}D"
+        assert (
+            len(img.shape) == 4
+        ), f"Expected 4D (batched) image input but got {len(img.shape)}D"
         b, _, _, _ = img.shape
 
         if self.patch_method == "linear":

@@ -69,7 +69,8 @@ disable=
     no-name-in-module,
     too-many-instance-attributes,
     logging-fstring-interpolation,
-    missing-module-docstring
+    missing-module-docstring,
+    useless-parent-delegation
 
 [REPORTS]
 
