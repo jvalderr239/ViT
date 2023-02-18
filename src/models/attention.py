@@ -1,4 +1,4 @@
-from torch import Tensor, einsum, finfo, float32, mm, nn
+from torch import Tensor, einsum, finfo, float32, nn
 
 
 class MultiHeadAttention(nn.Module):

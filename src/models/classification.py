@@ -2,17 +2,16 @@ from torch import Tensor, mean, nn
 
 
 class LambdaMeanLayer(nn.Module):
-    def __init__(self, method="linear", kernel: int = 16):
+    def __init__(self):
         """
         Custom layer to generate image patches
 
         Keyword Arguments:
             kernel -- image patch size (default: {16})
         """
-        super(LambdaMeanLayer, self).__init__()
 
     def forward(self, x: Tensor) -> Tensor:
-        return self.torch.mean(x, 1, True)
+        return mean(x, 1, True)
 
 
 class ClassificationHead(nn.Sequential):

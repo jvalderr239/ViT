@@ -1,7 +1,8 @@
-from attention import TransformerEncoder
-from classification import ClassificationHead
-from patch_embeddings import PatchEmbedding
 from torch import nn
+
+from src.models.attention import TransformerEncoder
+from src.models.classification import ClassificationHead
+from src.models.patch_embeddings import PatchEmbedding
 
 
 class ViT(nn.Sequential):

@@ -44,7 +44,7 @@ check-format:
 	${BIN}/isort --check-only ${python_src} 
 
 check-types:
-	${BIN}/mypy ${python_src} --install-types --non-interactive --namespace-packages
+	${BIN}/mypy ${python_src}
 
 build: venv
 	${PIP} install wheel
@@ -63,7 +63,7 @@ format: venv
 	${BIN}/isort ${python_src}
 
 dev: venv
-	${PIP} install -e ${PROJECT}.[dev]
+	${PIP} install -e ${PROJECT}.[dev] --target target
 
 lint:
 	${BIN}/pylint ${python_src} -f parseable -r n
@@ -73,6 +73,7 @@ clean: clean-build clean-pyc clean-check clean-test
 clean-build:
 	rm -rf ${VENV}/
 	rm -rf ${DIST}/
+	rm -rf build/
 	rm -rf .eggs/
 	find . -name '*.egg-info' -exec rm -rf {} +
 	find . -name '*.egg' -exec rm -rf {} +

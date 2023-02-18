@@ -2,14 +2,14 @@ from torch import Tensor, cat, nn, randn
 
 
 class LambdaPatchLayer(nn.Module):
-    def __init__(self, method="linear", kernel: int = 16):
+    def __init__(self, kernel: int = 16):
         """
         Custom layer to generate image patches
 
         Keyword Arguments:
             kernel -- image patch size (default: {16})
         """
-        super(LambdaPatchLayer, self).__init__()
+        super().__init__()
         self.kernel = kernel
 
     def forward(self, x: Tensor) -> Tensor:
