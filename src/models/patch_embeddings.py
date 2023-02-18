@@ -1,7 +1,4 @@
-from functools import partial
-
-import torch.nn.functional as F
-from torch import Tensor, nn, reshape
+from torch import Tensor, cat, nn, randn
 
 
 class LambdaPatchLayer(nn.Module):
@@ -49,7 +46,7 @@ class PatchEmbedding(nn.Module):
 
     Source: https://arxiv.org/pdf/2010.11929.pdf
     """
-    def __init__(self, channels: int = 3, patch_size: int = 16, emb_size: int = 768, method: str = "conv"):
+    def __init__(self, channels: int = 3, patch_size: int = 16, emb_size: int = 768, img_size: int = 224, method: str = "conv"):
         """
         Generate linear projection layer to map image patches to token embedding layer
 
@@ -57,10 +54,13 @@ class PatchEmbedding(nn.Module):
             channels -- Number of channels for image
             patch_size -- Dimension of square image patch
             emb_size -- size of token embeddings
+            img_size -- shape of square image
             method -- method to use for image patching
         """
         super().__init__()
+
         self.method = method
+
         if self.method == "conv":
             self.projection = nn.Sequential(
                 ## authors use conv layer for performance gain that uses kernel size of patch
@@ -74,6 +74,11 @@ class PatchEmbedding(nn.Module):
             )
         else:
             raise ValueError(f"Unrecognized patching method: {method}")
+        
+        
+        self.cls_token = nn.Parameter(randn(1,1, emb_size))
+        ## positional embedding size: N_PATCHES + 1 (token), EMBED_SIZE
+        self.positions = nn.Parameter(randn((img_size // patch_size) **2 + 1, emb_size))
 
     def forward(self, img: Tensor) -> Tensor:
         """
@@ -83,11 +88,18 @@ class PatchEmbedding(nn.Module):
             img -- Input image for model
 
         Returns:
-            1D linear projection of image patches
+            1D linear projection of image patches along with positional and class embeddings
         """
-        if self.method == "linear":
-            return self.projection(img)
         b, *_ = img.shape
-        conv_output = self.projection(img)
-        _ , c2, h2, w2 = conv_output.shape
-        return conv_output.reshape(b, h2 * w2, c2)
+
+        if self.method == "linear":
+            x = self.projection(img)
+        else:
+            conv_output = self.projection(img)
+            _ , c2, h2, w2 = conv_output.shape
+            x = conv_output.reshape(b, h2 * w2, c2)
+
+        # prepend the cls token to the inputQ
+        cls_tokens = self.cls_token.repeat(1, b, 1)
+        x = cat([cls_tokens, x], dim=1) + self.positions
+        return x
