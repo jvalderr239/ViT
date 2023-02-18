@@ -2,7 +2,6 @@ from torch import Tensor, cat, nn, randn
 
 
 class LambdaPatchLayer(nn.Module):
-    
     def __init__(self, method="linear", kernel: int = 16):
         """
         Custom layer to generate image patches
@@ -12,14 +11,11 @@ class LambdaPatchLayer(nn.Module):
         """
         super(LambdaPatchLayer, self).__init__()
         self.kernel = kernel
-        self.mapping = {
-            "linear": self.patch,
-            "conv": 1 ### update
-        }
+
     def forward(self, x: Tensor) -> Tensor:
         return self.patch(x)
 
-    def patch(self, img: Tensor)->Tensor:
+    def patch(self, img: Tensor) -> Tensor:
         """
         Slices the images into square patches
         Arguments:
@@ -31,8 +27,11 @@ class LambdaPatchLayer(nn.Module):
         """
         assert len(img.shape) == 4, "Invalid input image batch size"
         b, c, *_ = img.shape
-        patches = img.unfold(2, self.kernel, self.kernel).unfold(3, self.kernel, self.kernel)
+        patches = img.unfold(2, self.kernel, self.kernel).unfold(
+            3, self.kernel, self.kernel
+        )
         return patches.reshape(b, -1, c * self.kernel * self.kernel)
+
 
 class PatchEmbedding(nn.Module):
     """
@@ -46,7 +45,15 @@ class PatchEmbedding(nn.Module):
 
     Source: https://arxiv.org/pdf/2010.11929.pdf
     """
-    def __init__(self, channels: int = 3, patch_size: int = 16, emb_size: int = 768, img_size: int = 224, method: str = "conv"):
+
+    def __init__(
+        self,
+        channels: int = 3,
+        patch_size: int = 16,
+        emb_size: int = 768,
+        img_size: int = 224,
+        patch_method: str = "conv",
+    ):
         """
         Generate linear projection layer to map image patches to token embedding layer
 
@@ -55,30 +62,35 @@ class PatchEmbedding(nn.Module):
             patch_size -- Dimension of square image patch
             emb_size -- size of token embeddings
             img_size -- shape of square image
-            method -- method to use for image patching
+            patch_method -- method to use for image patching
         """
         super().__init__()
 
-        self.method = method
+        if patch_method not in ("linear", "conv"):
+            raise ValueError(f"Unrecognized patching method: {patch_method}")
 
-        if self.method == "conv":
+        self.patch_method = patch_method
+
+        if self.patch_method == "conv":
             self.projection = nn.Sequential(
                 ## authors use conv layer for performance gain that uses kernel size of patch
                 ## apply convolution to each patch and then flatten
-                nn.Conv2d(channels, emb_size, kernel_size=patch_size, stride=patch_size),
-                )
-        elif self.method == "linear":
+                nn.Conv2d(
+                    channels, emb_size, kernel_size=patch_size, stride=patch_size
+                ),
+            )
+
+        elif self.patch_method == "linear":
             self.projection = nn.Sequential(
                 LambdaPatchLayer(kernel=patch_size),
-                nn.Linear(patch_size * patch_size * channels, emb_size)
+                nn.Linear(patch_size * patch_size * channels, emb_size),
             )
-        else:
-            raise ValueError(f"Unrecognized patching method: {method}")
-        
-        
-        self.cls_token = nn.Parameter(randn(1,1, emb_size))
+
+        self.cls_token = nn.Parameter(randn(1, 1, emb_size))
         ## positional embedding size: N_PATCHES + 1 (token), EMBED_SIZE
-        self.positions = nn.Parameter(randn((img_size // patch_size) **2 + 1, emb_size))
+        self.positions = nn.Parameter(
+            randn((img_size // patch_size) ** 2 + 1, emb_size)
+        )
 
     def forward(self, img: Tensor) -> Tensor:
         """
@@ -92,11 +104,11 @@ class PatchEmbedding(nn.Module):
         """
         b, *_ = img.shape
 
-        if self.method == "linear":
+        if self.patch_method == "linear":
             x = self.projection(img)
         else:
             conv_output = self.projection(img)
-            _ , c2, h2, w2 = conv_output.shape
+            _, c2, h2, w2 = conv_output.shape
             x = conv_output.reshape(b, h2 * w2, c2)
 
         # prepend the cls token to the inputQ

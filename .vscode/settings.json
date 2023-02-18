@@ -55,8 +55,9 @@
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.pylintPath": "ViT/venv/bin/pylint",
-    "python.linting.mypyPath": "ViT/venv/bin/mypy",
     "python.formatting.blackPath": "ViT/venv/bin/black",
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true,
     "python.linting.flake8Args": [
         // Match what black does.
         "--max-line-length=88"
@@ -65,5 +66,4 @@
     "autoDocstring.quoteStyle": "\"\"\"",
     "autoDocstring.generateDocstringOnEnter": true,
     "typescript.preferences.importModuleSpecifier": "relative",
-    "python.formatting.provider": "black",
-    }
+}

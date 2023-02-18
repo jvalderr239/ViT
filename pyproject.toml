@@ -20,7 +20,8 @@ dev = [
   "matplotlib", 
   "pandas", 
   "ipykernel",
-  "Pillow"
+  "Pillow",
+  "torchsummary"
   ]
 
 [project.urls]

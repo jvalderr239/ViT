@@ -29,6 +29,7 @@ $(VENV)/bin/activate: requirements.txt
 	python3.8 -m venv $(VENV)
 	${PIP} install --upgrade pip black isort mypy pytest coverage pylint
 	${PIP} install -r requirements.txt
+	stubgen ${python_src} -o ${VENV}/stubs
 
 help:
 	${PYTHON} -c "$$PRINT_HELP_SCRIPT" < "$(MAKEFILE_LIST)"
@@ -40,10 +41,10 @@ check: venv check-format check-types lint
 
 check-format:
 	${BIN}/black --check ${python_src}
-	${BIN}/isort --check-only ${python_src}
+	${BIN}/isort --check-only ${python_src} 
 
 check-types:
-	${BIN}/mypy ${python_src}
+	${BIN}/mypy ${python_src} --install-types --non-interactive --namespace-packages
 
 build: venv
 	${PIP} install wheel
