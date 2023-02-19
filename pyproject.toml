@@ -19,9 +19,13 @@ dynamic = ["version", "readme"]
 dev = [
   "matplotlib", 
   "pandas", 
+  "jupyter",
   "ipykernel",
   "Pillow",
-  "torchsummary"
+  "torchsummary",
+  "ipywidgets",
+  "widgetsnbextension",
+  "pandas-profiling"
   ]
 
 [project.urls]

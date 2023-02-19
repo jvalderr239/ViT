@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("./README.md", "r") as fh:
     long_description = fh.read()
@@ -22,11 +22,9 @@ setup(
         "tqdm",
         "torchvision",
         "torch",
-        "requests",
         "torchinfo",
-        "opencv-python",
-        "matplotlib",
         "rich",
+        "albumentations[imgaug]"
     ],
     python_requires=">=3.8"
 )

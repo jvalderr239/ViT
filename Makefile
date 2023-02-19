@@ -63,7 +63,7 @@ format: venv
 	${BIN}/black ${python_src}
 	${BIN}/isort ${python_src}
 
-dev: venv
+dev: clean venv
 	${PIP} install -e ${PROJECT}.[dev] --target ${LIBS}
 
 lint:
