@@ -2,7 +2,7 @@ from torch import Tensor, cat, nn, randn
 
 
 class LambdaPatchLayer(nn.Module):
-    def __init__(self, kernel: int = 16):
+    def __init__(self, patch_method="conv", kernel: int = 16):
         """
         Custom layer to generate image patches
 
@@ -11,9 +11,11 @@ class LambdaPatchLayer(nn.Module):
         """
         super().__init__()
         self.kernel = kernel
+        self.patch_method = patch_method
 
     def forward(self, x: Tensor) -> Tensor:
-        return self.patch(x)
+
+        return self.reshape(x) if self.patch_method == "conv" else self.patch(x)
 
     def patch(self, img: Tensor) -> Tensor:
         """
@@ -31,6 +33,18 @@ class LambdaPatchLayer(nn.Module):
             3, self.kernel, self.kernel
         )
         return patches.reshape(b, -1, c * self.kernel * self.kernel)
+    
+    def reshape(self, conv_output: Tensor) -> Tensor:
+        """
+        Method to flatten image patches formed from conv layer
+        Arguments:
+            conv_output -- Image patches
+
+        Returns:
+            Flattened image patches
+        """
+        b, c2, h2, w2 = conv_output.shape
+        return conv_output.reshape(b, h2 * w2, c2)
 
 
 class PatchEmbedding(nn.Module):
@@ -78,11 +92,12 @@ class PatchEmbedding(nn.Module):
                 nn.Conv2d(
                     channels, emb_size, kernel_size=patch_size, stride=patch_size
                 ),
+                LambdaPatchLayer(patch_method=self.patch_method)
             )
 
         elif self.patch_method == "linear":
             self.projection = nn.Sequential(
-                LambdaPatchLayer(kernel=patch_size),
+                LambdaPatchLayer(patch_method=self.patch_method, kernel=patch_size),
                 nn.Linear(patch_size * patch_size * channels, emb_size),
             )
 
@@ -105,18 +120,12 @@ class PatchEmbedding(nn.Module):
         assert (
             len(img.shape) == 4
         ), f"Expected 4D (batched) image input but got {len(img.shape)}D"
-        b, _, _, _ = img.shape
 
-        if self.patch_method == "linear":
-            x = self.projection(img)
-        else:
-            conv_output = self.projection(img)
-            _, c2, h2, w2 = conv_output.shape
-            x = conv_output.reshape(b, h2 * w2, c2)
+        b, _, _, _ = img.shape
+        x = self.projection(img)
 
         # prepend the cls token to the inputQ
         cls_tokens = self.cls_token.repeat(b, 1, 1)
-        print(cls_tokens.shape, x.shape)
         # prepend the cls token to the input and add position embedding
         x = cat([cls_tokens, x], dim=1) + self.positions
         return x
