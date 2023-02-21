@@ -19,12 +19,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "tqdm",
-        "torchvision",
-        "torch",
-        "torchinfo",
-        "rich",
-        "albumentations[imgaug]"
+        "albumentations==1.3.0",
+        "torch==1.13.1",
+        "torchvision==0.14.1",
+        "tqdm==4.64.1"
     ],
     python_requires=">=3.8"
 )

@@ -1,47 +1,85 @@
 import time
+from datetime import datetime
+from pathlib import Path
 
 import torch
-from torch.utils.data import DataLoader, Dataset
-from torchvision import datasets
+from torch.utils import tensorboard
 from tqdm import tqdm
 
-from src.utils.transforms import ImageTransform
+from src.models.vit import ViT
+from src.utils.parameters import generate_dataloaders, warmup
+from src.utils.train_utils import train_one_epoch
 
 from . import config
 
+Path(config.BASE_PATH).mkdir(parents=True, exist_ok=True)
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-def generate_dataloaders(data: Dataset, train_val_test_split: float = 0.8, batch_size: int = 64)-> DataLoader:
-  """
-  Generate train, val, test dataloaders
-
-  Arguments:
-      data -- dataset from which to generate train, val, test dataloaders
-
-  Returns:
-      Dictionary with each dataloader
-  """
-  # Parameters
-  kwargs = {'num_workers': 4, 'pin_memory': True} if DEVICE=='cuda' else {}
-  kwargs = {**kwargs, **{'batch_size': batch_size, 'shuffle': True,}}
-  # Fetch dataset and generate DataLoaders
-  dataset_size = len(data)
-  train_size =  int(train_val_test_split * dataset_size)
-  val_size = test_size = int(1. - train_val_test_split) * (dataset_size - train_size) // 2
-  train_set, val_set, test_set = torch.utils.data.random_split(data, [train_size, val_size, test_size])
-
-  dataloaders = {
-    dtype: DataLoader(
-      data, 
-      transform=ImageTransform(dtype), **kwargs
-      ) for dtype, data in (("train", train_set), ("val", val_set), ("test", test_set))
-  }
-  return dataloaders
-
-
-dataloaders = generate_dataloaders(data=config.dataset)
+dataloaders = generate_dataloaders(
+    config.TRAIN_DATASET,
+    config.TEST_DATASET,
+    batch_size=config.BATCH_SIZE,
+    device=DEVICE,
+)
 
 print("[INFO] training the network...")
 startTime = time.time()
 
-#for e in tqdm(range(config.NUM_EPOCHS)):
+# training parameters
+model = ViT()
+# Optimizers specified in the torch.optim package
+optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), weight_decay=0.1)
+lr_scheduler = warmup(
+    optimizer=optimizer,
+    training_steps=config.TRAINING_STEPS,
+    warmup_steps=config.WARMUP_STEPS,
+)
+loss_fn = torch.nn.CrossEntropyLoss()
+
+# Initializing in a separate cell so we can easily add more epochs to the same run
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+writer = tensorboard.SummaryWriter(f"{config.TRAIN_PATH}runs/fashion_trainer_{timestamp}")
+best_vloss = 1_000_000.0
+
+for epoch_number in tqdm(range(config.NUM_EPOCHS)):
+    print(f"EPOCH {epoch_number + 1}:")
+
+    # Make sure gradient tracking is on, and do a pass over the data
+    model.train(True)
+    avg_loss = train_one_epoch(
+        epoch_index=epoch_number,
+        training_loader=dataloaders.get("train"),
+        optimizer=lr_scheduler,
+        model=model,
+        loss_fn=loss_fn,
+        tb_writer=writer,
+    )
+
+    # We don't need gradients on to do reporting
+    model.train(False)
+
+    running_vloss = 0.0
+    for i, vdata in enumerate(dataloaders["test"]):
+        vinputs, vlabels = vdata
+        voutputs = model(vinputs)
+        vloss = loss_fn(voutputs, vlabels)
+        running_vloss += vloss
+
+    avg_vloss = running_vloss / (len(dataloaders["test"]) + 1)
+    print(f"LOSS train {avg_loss} valid {avg_vloss}")
+
+    # Log the running loss averaged per batch
+    # for both training and validation
+    writer.add_scalars(
+        "Training vs. Validation Loss",
+        {"Training": avg_loss, "Validation": avg_vloss},
+        epoch_number + 1,
+    )
+    writer.flush()
+
+    # Track best performance, and save the model's state
+    if avg_vloss < best_vloss:
+        best_vloss = avg_vloss
+        model_path = f"{config.MODEL_PATH}model_{timestamp}_{epoch_number}"
+        torch.save(model.state_dict(), model_path)

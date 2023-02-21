@@ -14,7 +14,6 @@ class LambdaPatchLayer(nn.Module):
         self.patch_method = patch_method
 
     def forward(self, x: Tensor) -> Tensor:
-
         return self.reshape(x) if self.patch_method == "conv" else self.patch(x)
 
     def patch(self, img: Tensor) -> Tensor:
@@ -33,7 +32,7 @@ class LambdaPatchLayer(nn.Module):
             3, self.kernel, self.kernel
         )
         return patches.reshape(b, -1, c * self.kernel * self.kernel)
-    
+
     def reshape(self, conv_output: Tensor) -> Tensor:
         """
         Method to flatten image patches formed from conv layer
@@ -92,7 +91,7 @@ class PatchEmbedding(nn.Module):
                 nn.Conv2d(
                     channels, emb_size, kernel_size=patch_size, stride=patch_size
                 ),
-                LambdaPatchLayer(patch_method=self.patch_method)
+                LambdaPatchLayer(patch_method=self.patch_method),
             )
 
         elif self.patch_method == "linear":
