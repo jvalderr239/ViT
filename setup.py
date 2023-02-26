@@ -25,7 +25,8 @@ setup(
         "albumentations==1.3.0",
         "torch==1.13.1",
         "torchvision==0.14.1",
-        "tqdm==4.64.1"
+        "tqdm==4.64.1",
+        "protobuf"
     ],
     extras_require={
         "dev": [

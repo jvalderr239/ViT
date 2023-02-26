@@ -1,7 +1,11 @@
 import random
+from typing import Union
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+from numpy import array, ndarray
+from PIL.Image import Image
+from torch import Tensor
 
 random.seed(239)
 
@@ -63,5 +67,13 @@ class ImageTransform:
     def __init__(self, datatype: str) -> None:
         self.datatype = datatype
 
-    def __call__(self, img):
+    def __call__(self, img: Union[Tensor, Image, ndarray]):
+        
+        if isinstance(img, ndarray):
+            img = img.numpy()
+        elif isinstance(img, Image):
+            img = array(img)
+        else:
+            raise ValueError(f"Expected input of type Tensor but received {type(img)}")
+
         return DEFAULT_TRANSFORMS[self.datatype](image=img)["image"]

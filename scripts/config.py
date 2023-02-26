@@ -1,11 +1,15 @@
+import ssl
+
 from torch import cuda
+from torch.utils.data import random_split
 from torchvision import datasets
 
 from src.utils.transforms import ImageTransform
 
+ssl._create_default_https_context = ssl._create_unverified_context
 # define the base path to the input dataset and then use it to derive
 # the path to the input images and annotation CSV files
-BASE_PATH = "../train_files/"
+BASE_PATH = "./train_files/"
 DATASET_PATH = BASE_PATH + "dataset/"
 MODEL_PATH = BASE_PATH + "model/"
 TRAIN_PATH = BASE_PATH + "train/"
@@ -24,17 +28,16 @@ BATCH_SIZE = 32
 TRAINING_STEPS = 20
 WARMUP_STEPS = 5
 # define dataset
-TRAIN_DATASET = datasets.EuroSAT(
+__DATASET__ = datasets.EuroSAT(
     BASE_PATH,
     download=True,
-    train=True,
     transform=ImageTransform("train"),
-    extensions=".jpg",
 )
-TEST_DATASET = datasets.EuroSAT(
-    BASE_PATH,
-    download=True,
-    train=False,
-    transform=ImageTransform("test"),
-    extensions=".jpg",
-)
+__DATASET_SIZE__ = len(__DATASET__)
+DATASET_LABELS = set(__DATASET__.targets)
+NUM_CLASSES = len(DATASET_LABELS)
+# Train, val, test split
+TRAIN_SIZE = int(0.7 * __DATASET_SIZE__)
+REM_SIZE = __DATASET_SIZE__ - TRAIN_SIZE
+TRAIN_DATASET, REM_DATASET = random_split(__DATASET__, [TRAIN_SIZE, REM_SIZE])
+TEST_DATASET, VAL_DATASET = random_split(REM_DATASET, [REM_SIZE//2, REM_SIZE//2])

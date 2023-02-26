@@ -1,4 +1,22 @@
-def train_one_epoch(epoch_index, training_loader, tb_writer, optimizer, model, loss_fn):
+import logging
+
+import torch.nn.functional as F
+from torch.utils.data import DataLoader
+
+# setup logger
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger('train')
+
+
+def train_one_epoch(
+    epoch_index: int, 
+    training_loader: DataLoader, 
+    tb_writer, 
+    optimizer, 
+    model, 
+    loss_fn,
+    n_classes
+    ):
     running_loss = 0.0
     last_loss = 0.0
 
@@ -14,9 +32,11 @@ def train_one_epoch(epoch_index, training_loader, tb_writer, optimizer, model, l
 
         # Make predictions for this batch
         outputs = model(inputs)
-        predicted_class_idx = outputs.argmax(-1).item()
+        outputs = outputs.squeeze(1)
+        log.info(f"Output shape: {outputs.shape}")
         # Compute the loss and its gradients
-        loss = loss_fn(predicted_class_idx, labels)
+        #one_hot_labels = F.one_hot(labels, num_classes = n_classes).long()
+        loss = loss_fn(outputs, labels)
         loss.backward()
 
         # Adjust learning weights

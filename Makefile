@@ -68,7 +68,7 @@ format: venv
 	${PYTHON} black ${python_src}
 	${PYTHON} isort ${python_src}
 
-dev: clean venv
+dev: 
 	pip install -e ${PROJECT}.[dev] 
 
 lint:

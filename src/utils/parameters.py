@@ -7,9 +7,11 @@ from torch.utils.data import DataLoader, Dataset
 
 def generate_dataloaders(
     train_dataset: Dataset,
+    val_dataset: Dataset,
     test_dataset: Dataset,
     batch_size: int = 64,
     device="cpu",
+    **kwargs
 ) -> Dict[str, DataLoader]:
     """
     Generate train, val, test dataloaders
@@ -21,16 +23,17 @@ def generate_dataloaders(
         Dictionary with each dataloader
     """
     # Parameters
-    kwargs = {"batch_size": batch_size, "shuffle": True}
+    dataset_kwargs = {"batch_size": batch_size, "shuffle": True}
     cuda_kwargs = {"num_workers": 4, "pin_memory": True} if device == "cuda" else {}
-    kwargs.update(cuda_kwargs)
+    dataset_kwargs.update(cuda_kwargs)
     # Fetch dataset and generate DataLoaders
 
     dataloaders = {
-        dtype: DataLoader(data, **kwargs)  # type: ignore
+        dtype: DataLoader(data, **dataset_kwargs, **kwargs)  # type: ignore
         for dtype, data in (
             ("train", train_dataset),
             ("test", test_dataset),
+            ("val", val_dataset),
         )
     }
     return dataloaders
