@@ -39,7 +39,9 @@ loss_fn = torch.nn.CrossEntropyLoss()
 
 # Initializing in a separate cell so we can easily add more epochs to the same run
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-writer = tensorboard.SummaryWriter(f"{config.TRAIN_PATH}runs/fashion_trainer_{timestamp}")
+writer = tensorboard.SummaryWriter(
+    f"{config.TRAIN_PATH}runs/fashion_trainer_{timestamp}"
+)
 best_vloss = 1_000_000.0
 
 for epoch_number in tqdm(range(config.NUM_EPOCHS)):

@@ -11,7 +11,10 @@ setup(
     description="Visual Transformer",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jvalderr239/ViT",
+    project_urls={
+        "Source": "https://github.com/jvalderr239/ViT",
+        "Bug Tracker": "https://github.com/jvalderr239/ViT/issues",
+    },
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -24,5 +27,18 @@ setup(
         "torchvision==0.14.1",
         "tqdm==4.64.1"
     ],
+    extras_require={
+        "dev": [
+            "matplotlib", 
+            "pandas", 
+            "jupyter",
+            "ipykernel",
+            "Pillow",
+            "torchsummary",
+            "ipywidgets",
+            "widgetsnbextension",
+            "pandas-profiling"
+            ]
+    },
     python_requires=">=3.8"
 )

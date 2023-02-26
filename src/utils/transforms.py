@@ -7,10 +7,10 @@ random.seed(239)
 
 train_transforms = A.Compose(
     [
-        A.RandomRotate90(),
-        A.Flip(),
-        A.Transpose(),
-        A.GaussNoise(),
+        A.RandomRotate90(p=0.4),
+        A.Flip(p=0.3),
+        A.Transpose(p=0.15),
+        A.GaussNoise(p=0.4),
         A.OneOf(
             [
                 A.MotionBlur(p=0.2),

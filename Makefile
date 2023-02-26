@@ -1,11 +1,14 @@
+.ONESHELL:
 # define the name of the virtual environment directory
 VENV := venv
 BIN := ${VENV}/bin
-PYTHON := ${BIN}/python3.8
-PIP := ${BIN}/pip
+PYTHON := ${BIN}/python3.8 -m
 DIST := ${VENV}/dist
+PIP := ${PYTHON} pip install --upgrade
 LIBS := ${VENV}/lib/python3.8/site-packages
+VENV_PROJECT := ${VENV}/vit
 PROJECT := ${VENV}/../
+BUILD := ./build
 
 .DEFAULT_GOAL := help
 
@@ -26,11 +29,10 @@ coverage_src = src
 # default target, when make executed without arguments
 all: venv
 
-$(VENV)/bin/activate: requirements.txt
-	python3.8 -m venv $(VENV)
-	${PIP} install --upgrade pip black isort mypy pytest coverage pylint
-	${PIP} install -r requirements.txt
-	stubgen ${python_src} -o ${VENV}/stubs
+$(VENV)/bin/activate: requirements.txt setup.py
+	test -d $(VENV) || python3.8 -m venv $(VENV)
+	${PIP} pip black isort mypy pytest coverage pylint
+	${PIP} -r requirements.txt
 
 help:
 	${PYTHON} -c "$$PRINT_HELP_SCRIPT" < "$(MAKEFILE_LIST)"
@@ -41,33 +43,36 @@ venv: $(VENV)/bin/activate
 check: venv check-format check-types lint
 
 check-format:
-	${BIN}/black --check ${python_src}
-	${BIN}/isort --check-only ${python_src} 
+	${PYTHON} black --check ${python_src}
+	${PYTHON} isort --check-only ${python_src} 
 
 check-types:
-	${BIN}/mypy ${python_src}
+	${PYTHON} mypy ${python_src}
 
 build: venv
-	${PIP} install wheel --target ${LIBS}
-	${PYTHON} -m setup bdist_wheel
+	${PIP} wheel 
+	${PYTHON} setup bdist_wheel -d ${DIST} 
 
-test: build
-	${PIP} install ${DIST}/*
-	${BIN}/coverage run --branch --source ${coverage_src} -m ${BIN}/pytest src/tests
-	${BIN}/coverage report -m 
+install: build
+	test -d ${VENV_PROJECT} || ${PIP} ${DIST}/* --no-deps --target ${VENV_PROJECT} 
+	test -d ${VENV_PROJECT}/packages || ${PIP} -r requirements.txt --target ${VENV_PROJECT}/packages
+
+test: clean install
+	${PYTHON} coverage run --branch --source ${coverage_src} -m pytest ${VENV_PROJECT}/tests 
+	${PYTHON} coverage report 
 
 coverage: test
-	${BIN}/coverage html
+	${PYTHON} coverage html
 
 format: venv
-	${BIN}/black ${python_src}
-	${BIN}/isort ${python_src}
+	${PYTHON} black ${python_src}
+	${PYTHON} isort ${python_src}
 
 dev: clean venv
-	${PIP} install -e ${PROJECT}.[dev] --target ${LIBS}
+	pip install -e ${PROJECT}.[dev] 
 
 lint:
-	${BIN}/pylint ${python_src} -f parseable -r n
+	${PYTHON} pylint ${python_src} -f parseable -r n
 
 clean: clean-build clean-pyc clean-check clean-test
 
@@ -91,6 +96,7 @@ clean-check:
 clean-test:
 	find . -name '.pytest_cache' -exec rm -rf {} +
 	rm -f coverage
+	rm -f .coverage
 	rm -rf htmlcov/
 
 .PHONY: all clean check dev build test help
