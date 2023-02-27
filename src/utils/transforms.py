@@ -3,7 +3,7 @@ from typing import Union
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-from numpy import array, ndarray
+from numpy import array, generic, ndarray
 from PIL.Image import Image
 from torch import Tensor
 
@@ -67,11 +67,11 @@ class ImageTransform:
 
     def __call__(self, img: Union[Tensor, Image, ndarray]):
         
-        if isinstance(img, ndarray):
+        if isinstance(img, Tensor):
             img = img.numpy()
         elif isinstance(img, Image):
             img = array(img)
-        else:
+        elif not isinstance(img, (ndarray, generic)):
             raise ValueError(f"Expected input of type Tensor but received {type(img)}")
 
         return self.DEFAULT_TRANSFORMS[self.datatype](image=img)["image"]
