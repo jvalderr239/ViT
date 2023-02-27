@@ -33,9 +33,11 @@ def train_one_epoch(
         # Make predictions for this batch
         outputs = model(inputs)
         outputs = outputs.squeeze(1)
-        log.info(f"Output shape: {outputs.shape}")
         # Compute the loss and its gradients
-        #one_hot_labels = F.one_hot(labels, num_classes = n_classes).long()
+        one_hot_labels = F.one_hot(labels, num_classes = n_classes)
+
+        log.info(f"Output shape: {outputs.shape}, one_hot: {one_hot_labels.shape}")
+        log.info
         loss = loss_fn(outputs, labels)
         loss.backward()
 
