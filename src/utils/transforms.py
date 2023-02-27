@@ -56,14 +56,12 @@ val_transforms = A.Compose(
     ]
 )
 
-DEFAULT_TRANSFORMS = {
-    "train": train_transforms,
-    "val": val_transforms,
-    "test": val_transforms,
-}
-
-
 class ImageTransform:
+    DEFAULT_TRANSFORMS = {
+        "train": train_transforms,
+        "val": val_transforms,
+        "test": val_transforms,
+    }
     def __init__(self, datatype: str) -> None:
         self.datatype = datatype
 
@@ -76,4 +74,4 @@ class ImageTransform:
         else:
             raise ValueError(f"Expected input of type Tensor but received {type(img)}")
 
-        return DEFAULT_TRANSFORMS[self.datatype](image=img)["image"]
+        return self.DEFAULT_TRANSFORMS[self.datatype](image=img)["image"]

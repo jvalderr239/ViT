@@ -9,11 +9,11 @@ class LambdaMeanLayer(nn.Module):
         super().__init__()
 
     def forward(self, x: Tensor) -> Tensor:
-        return mean(x, 1, True)
+        return mean(x, 1, False)
 
 
 class ClassificationHead(nn.Sequential):
     def __init__(self, emb_size: int = 768, n_classes: int = 1000):
         super().__init__(
-            LambdaMeanLayer(), nn.LayerNorm(emb_size), nn.Linear(emb_size, n_classes)
+            LambdaMeanLayer(), nn.LayerNorm(emb_size), nn.Linear(emb_size, n_classes), nn.Softmax(dim=-1) 
         )

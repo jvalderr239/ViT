@@ -10,8 +10,9 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from src.models.vit import ViT
-from src.utils.parameters import generate_dataloaders, warmup
-from src.utils.train_utils import train_one_epoch
+from src.utils.dataset import generate_dataloaders
+from src.utils.model_training import train_one_epoch
+from src.utils.optimizer import warmup
 
 # setup logger
 logging.config.fileConfig('logging.conf')
@@ -20,21 +21,21 @@ log = logging.getLogger('train')
 log.info(f"Generating {config.BASE_PATH}")
 Path(config.BASE_PATH).mkdir(parents=True, exist_ok=True)
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+log.info("Loading model and train parameters...")
+startTime = time.time()
 
+# training parameters
+model = ViT(n_classes=config.NUM_CLASSES)
 dataloaders = generate_dataloaders(
     train_dataset=config.TRAIN_DATASET,
     val_dataset=config.VAL_DATASET,
     test_dataset=config.TEST_DATASET,
     batch_size=config.BATCH_SIZE,
-    device=DEVICE,
+    device=config.DEVICE,
+    sampler=torch.utils.data.RandomSampler(
+    torch.randperm(config.__DATASET_SIZE__)[:256]
+    )
 )
-
-log.info("Retrieving train parameters...")
-startTime = time.time()
-
-# training parameters
-model = ViT(n_classes=config.NUM_CLASSES)
 # Optimizers specified in the torch.optim package
 optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), weight_decay=0.1)
 lr_scheduler = warmup(
@@ -43,7 +44,6 @@ lr_scheduler = warmup(
     warmup_steps=config.WARMUP_STEPS,
 )
 loss_fn = torch.nn.CrossEntropyLoss()
-
 # Initializing in a separate cell so we can easily add more epochs to the same run
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 writer = SummaryWriter(
@@ -62,9 +62,9 @@ for epoch_number in tqdm(range(config.NUM_EPOCHS)):
         training_loader=dataloaders.get("train"),
         optimizer=optimizer,
         model=model,
-        loss_fn=loss_fn,
         tb_writer=writer,
-        n_classes=config.NUM_CLASSES
+        n_classes=config.NUM_CLASSES,
+        loss_fn=loss_fn
     )
 
     # We don't need gradients on to do reporting
@@ -104,7 +104,7 @@ for i, tdata in enumerate(dataloaders["test"]):
     toutputs = model(tinputs)
 
     predicted_class_idx = toutputs.argmax(0)
-    tloss = loss_fn(toutputs, tlabels)
+    tloss = (toutputs, tlabels)
     running_tloss += tloss
     predicted_classes.append(predicted_class_idx)
 
