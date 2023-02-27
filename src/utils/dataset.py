@@ -1,4 +1,3 @@
-
 from typing import Dict
 
 import torch
@@ -28,7 +27,10 @@ def generate_dataloaders(
         _description_
     """
     # Parameters
-    dataset_kwargs = {"batch_size": batch_size, "shuffle": False if kwargs.get("sampler") else True}
+    dataset_kwargs = {
+        "batch_size": batch_size,
+        "shuffle": False if kwargs.get("sampler") else True,
+    }
     cuda_kwargs = {"num_workers": 4, "pin_memory": True} if device == "cuda" else {}
     dataset_kwargs.update(cuda_kwargs)
     # Fetch dataset and generate DataLoaders
@@ -43,6 +45,7 @@ def generate_dataloaders(
     }
     return dataloaders
 
+
 class VITSubset(Dataset):
     """
     Subset of a dataset at specified indices.
@@ -52,9 +55,11 @@ class VITSubset(Dataset):
         indices (sequence): Indices in the whole set selected for subset
         labels(sequence) : targets as required for the indices. will be the same length as indices
     """
+
     def __init__(self, dataset, indices, labels):
         self.dataset = Subset(dataset, indices)
         self.targets = labels
+
     def __getitem__(self, idx):
         image = self.dataset[idx][0]
         target = self.targets[idx]

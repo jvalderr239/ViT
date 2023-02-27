@@ -31,7 +31,7 @@ all: venv
 
 $(VENV)/bin/activate: requirements.txt setup.py
 	test -d $(VENV) || python3.8 -m venv $(VENV)
-	${PIP} pip black isort mypy pytest coverage pylint
+	${PIP} pip black isort mypy pytest coverage pylint 
 	${PIP} -r requirements.txt
 
 help:
@@ -47,7 +47,7 @@ check-format:
 	${PYTHON} isort --check-only ${python_src} 
 
 check-types:
-	${PYTHON} mypy ${python_src}
+	${PYTHON} mypy ${python_src} 
 
 build: venv
 	${PIP} wheel 
@@ -80,6 +80,7 @@ clean-build:
 	rm -rf ${VENV}/
 	rm -rf ${DIST}/
 	rm -rf build/
+	rm -rf out/
 	rm -rf .eggs/
 	find . -name '*.egg-info' -exec rm -rf {} +
 	find . -name '*.egg' -exec rm -rf {} +

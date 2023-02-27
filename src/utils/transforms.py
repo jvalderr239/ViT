@@ -56,17 +56,18 @@ val_transforms = A.Compose(
     ]
 )
 
+
 class ImageTransform:
     DEFAULT_TRANSFORMS = {
         "train": train_transforms,
         "val": val_transforms,
         "test": val_transforms,
     }
+
     def __init__(self, datatype: str) -> None:
         self.datatype = datatype
 
     def __call__(self, img: Union[Tensor, Image, ndarray]):
-        
         if isinstance(img, Tensor):
             img = img.numpy()
         elif isinstance(img, Image):

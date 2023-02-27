@@ -4,19 +4,19 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 # setup logger
-logging.config.fileConfig('logging.conf')
-log = logging.getLogger('train')
+logging.config.fileConfig("logging.conf")
+log = logging.getLogger("train")
 
 
 def train_one_epoch(
-    epoch_index: int, 
-    training_loader: DataLoader, 
-    tb_writer, 
-    optimizer, 
-    model, 
+    epoch_index: int,
+    training_loader: DataLoader,
+    tb_writer,
+    optimizer,
+    model,
     n_classes,
     loss_fn,
-    ) -> float:
+) -> float:
     """
     Function to train model for one epoch by enumerating batches
 
@@ -52,7 +52,7 @@ def train_one_epoch(
         # Compute the loss and its gradients
         # Be sure to pass floatTensor targets for class probabilities
         # Otherwise, pass class indices as LongTensor
-        one_hot_labels = F.one_hot(labels, num_classes = n_classes)
+        one_hot_labels = F.one_hot(labels, num_classes=n_classes)
         loss = loss_fn(outputs, one_hot_labels.float())
         loss.backward()
 

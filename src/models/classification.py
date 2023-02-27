@@ -15,5 +15,8 @@ class LambdaMeanLayer(nn.Module):
 class ClassificationHead(nn.Sequential):
     def __init__(self, emb_size: int = 768, n_classes: int = 1000):
         super().__init__(
-            LambdaMeanLayer(), nn.LayerNorm(emb_size), nn.Linear(emb_size, n_classes), nn.Softmax(dim=-1) 
+            LambdaMeanLayer(),
+            nn.LayerNorm(emb_size),
+            nn.Linear(emb_size, n_classes),
+            nn.Softmax(dim=-1),
         )
