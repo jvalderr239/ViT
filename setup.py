@@ -26,6 +26,7 @@ setup(
         "torch==1.13.1",
         "torchvision==0.14.1",
         "tqdm==4.64.1",
+        "Pillow",
         "protobuf"
     ],
     extras_require={
@@ -34,7 +35,6 @@ setup(
             "pandas", 
             "jupyter",
             "ipykernel",
-            "Pillow",
             "torchsummary",
             "ipywidgets",
             "widgetsnbextension",
