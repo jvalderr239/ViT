@@ -14,6 +14,12 @@ class LambdaMeanLayer(nn.Module):
 
 class ClassificationHead(nn.Sequential):
     def __init__(self, emb_size: int = 768, n_classes: int = 1000):
+        """_summary_
+
+        Keyword Arguments:
+            emb_size -- number of nodes to represent token (default: {768})
+            n_classes -- number of classes in dataset (default: {1000})
+        """
         super().__init__(
             LambdaMeanLayer(),
             nn.LayerNorm(emb_size),

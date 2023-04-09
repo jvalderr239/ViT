@@ -4,12 +4,12 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-import config
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from src.models.vit import ViT
+from scripts import config
+from src.models.vit.vit import ViT
 from src.utils.dataset import generate_dataloaders
 from src.utils.model_training import train_one_epoch
 from src.utils.optimizer import warmup

@@ -11,6 +11,13 @@ class MultiHeadAttention(nn.Module):
     def __init__(
         self, embed_size: int = 768, num_heads: int = 8, dropout: float = 0.0
     ) -> None:
+        """_summary_
+
+        Keyword Arguments:
+            embed_size -- number of nodes to represent token (default: {768})
+            num_heads -- number of transformer blocks (default: {8})
+            dropout -- dropout percentage (default: {0.0})
+        """
         super().__init__()
         self.emb_size = embed_size
         self.num_heads = num_heads

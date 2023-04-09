@@ -6,7 +6,9 @@ from torchvision import datasets
 
 from src.utils.transforms import ImageTransform
 
-ssl._create_default_https_context = ssl._create_unverified_context
+ssl._create_default_https_context = (
+    ssl._create_unverified_context
+)
 # define the base path to the input dataset and then use it to derive
 # the path to the input images and annotation CSV files
 BASE_PATH = "./train_files/"

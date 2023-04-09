@@ -123,8 +123,7 @@ class PatchEmbedding(nn.Module):
         b, _, _, _ = img.shape
         x = self.projection(img)
 
-        # prepend the cls token to the inputQ
-        cls_tokens = self.cls_token.repeat(b, 1, 1)
         # prepend the cls token to the input and add position embedding
+        cls_tokens = self.cls_token.repeat(b, 1, 1)
         x = cat([cls_tokens, x], dim=1) + self.positions
         return x

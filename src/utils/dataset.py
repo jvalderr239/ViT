@@ -1,6 +1,5 @@
 from typing import Dict
 
-import torch
 from torch.utils.data import DataLoader, Dataset, Subset
 
 
@@ -29,7 +28,7 @@ def generate_dataloaders(
     # Parameters
     dataset_kwargs = {
         "batch_size": batch_size,
-        "shuffle": False if kwargs.get("sampler") else True,
+        "shuffle": "sampler" in kwargs,
     }
     cuda_kwargs = {"num_workers": 4, "pin_memory": True} if device == "cuda" else {}
     dataset_kwargs.update(cuda_kwargs)
